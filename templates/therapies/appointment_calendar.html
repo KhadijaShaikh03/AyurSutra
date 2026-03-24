@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="main-content">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Appointment Calendar</h2>
+
+        <a href="{% url 'appointments' %}" class="btn btn-dark">
+            📋 List View
+        </a>
+    </div>
+
+    <!-- Calendar Card -->
+    <div class="card">
+        <div class="card-body">
+
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                        <th>Sun</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for week in calendar %}
+                    <tr>
+                        {% for day in week %}
+                        <td style="height:120px; vertical-align: top;">
+
+                            {% if day != 0 %}
+                                <strong>{{ day }}</strong>
+
+                                <!-- ✅ CORRECT LOGIC -->
+                                {% for appt in appointment_dict|get_item:day %}
+                                <a href="{% url 'appointment_detail' appt.id %}" style="text-decoration:none;">
+                                    <div class="small bg-success text-white p-1 mt-1 rounded">
+                                        {{ appt.patient }}
+                                    </div>
+                                </a>
+                                {% empty %}
+                            {% endfor %}
+                                    <!-- No appointments -->
+                                {% endfor %}
+
+                            {% endif %}
+
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

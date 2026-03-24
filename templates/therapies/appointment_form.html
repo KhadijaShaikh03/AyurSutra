@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+{% block content %}
+<div class="main-content">
+
+    <h2>Add Appointment</h2>
+
+    <div class="card">
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Patient</label>
+                    {{ form.patient|add_class:"form-select" }}
+                </div>
+
+                <div class="mb-3">
+                    <label>Therapy</label>
+                    {{ form.therapy|add_class:"form-select" }}
+                </div>
+
+                <div class="mb-3">
+                    <label>Date</label>
+                    {{ form.date|add_class:"form-control" }}
+
+                    <button type="button" onclick="setToday()" class="btn btn-sm btn-success mt-2">
+                        Today
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <label>Time</label>
+                    {{ form.time|add_class:"form-control" }}
+
+                    <button type="button" onclick="setNow()" class="btn btn-sm btn-primary mt-2">
+                        Now
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <label>Status</label>
+                    {{ form.status|add_class:"form-select" }}
+                </div>
+
+                <button type="submit" class="btn btn-dark">
+                    Save Appointment
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function setToday() {
+    document.getElementById("id_date").value =
+        new Date().toISOString().split('T')[0];
+}
+
+function setNow() {
+    let now = new Date();
+    let time = now.toTimeString().slice(0,5);
+    document.getElementById("id_time").value = time;
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main-content">
+    <h2>Therapies</h2>
+
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Duration</th>
+        </tr>
+
+        {% for therapy in therapies %}
+        <tr>
+            <td>{{ therapy.therapy_name }}</td>
+            <td>{{ therapy.duration }} days</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+}
+
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    position: fixed;
+    background: linear-gradient(180deg, #198754, #145c32);
+    color: white;
+    padding: 20px;
+}
+
+.sidebar h4 {
+    font-weight: 600;
+}
+
+.sidebar .nav-link {
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+.main-content {
+    margin-left: 220px;
+    padding: 30px;
+}
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #198754;
+    color: white;
+}
+
+.table tbody tr:hover {
+    background-color: #f1fdf6;
+}
+.btn {
+    border-radius: 6px;
+    transition: 0.2s ease;
+}
+
+.btn-success {
+    background-color: #198754;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #157347;
+}
+
+.btn-warning {
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+}
+
+h2 {
+    font-weight: 600;
+}
+
+form input, form textarea {
+    border-radius: 6px !important;
+    padding: 8px;
+}
+
+/* DROPDOWN FIX */
+form select {
+    border-radius: 6px;
+    padding: 8px;
+    appearance: auto;              /* restore dropdown arrow */
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    cursor: pointer;
+}
+.card, .btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #198754;
+    border-radius: 10px;
+}
+.card h2 {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.card.stat-card {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+}
+
+.card.stat-card h2 {
+    font-size: 36px;
+    margin: 0;
+    color: #198754;
+}
+
+.card.stat-card p {
+    margin: 5px 0 0;
+    color: #555;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-pending {
+    background-color: #ffc107;
+    color: black;
+}
+
+.badge-completed {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-cancelled {
+    background-color: #dc3545;
+    color: white;
+}
+
+.stat-card:nth-child(1) h2 { color: #0d6efd; }   /* Blue */
+.stat-card:nth-child(2) h2 { color: #198754; }   /* Green */
+.stat-card:nth-child(3) h2 { color: #dc3545; }   /* Red */
+/* ACTIVE SIDEBAR LINK */
+.nav-link.active {
+    background-color: rgba(255,255,255,0.3);
+    font-weight: bold;
+}
+select {
+    appearance: auto !important;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+}
