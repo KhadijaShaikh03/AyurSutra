@@ -1,0 +1,58 @@
+{% extends 'patients/base_patient.html' %}
+
+{% block content %}
+
+<style>
+.container { padding: 20px; }
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.section h6 {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.placeholder {
+    color: #777;
+}
+</style>
+
+<div class="container">
+    <div class="title">Diet Plan</div>
+
+    <div class="card">
+
+        <div class="section">
+            <h6>Morning</h6>
+            <p class="placeholder">Warm water + herbal drink (to be added)</p>
+        </div>
+
+        <div class="section">
+            <h6>Afternoon</h6>
+            <p class="placeholder">Balanced meal based on therapy</p>
+        </div>
+
+        <div class="section">
+            <h6>Evening</h6>
+            <p class="placeholder">Light dinner + detox suggestion</p>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

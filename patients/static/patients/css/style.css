@@ -171,7 +171,21 @@ form select {
     font-weight: bold;
 }
 select {
-    appearance: auto !important;
-    -webkit-appearance: menulist !important;
-    -moz-appearance: menulist !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+.calendar-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.calendar-table td {
+    height: 120px;
+    vertical-align: top;
+    word-wrap: break-word;
+}
+
+.main-content {
+    overflow-x: auto;
 }

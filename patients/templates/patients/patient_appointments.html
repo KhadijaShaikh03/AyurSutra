@@ -1,0 +1,77 @@
+{% extends 'patients/base_patient.html' %}
+
+{% block content %}
+
+<style>
+.container { padding: 20px; }
+.title { font-size: 24px; font-weight: 600; margin-bottom: 20px; }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.completed { background: #d4edda; color: #155724; }
+.pending { background: #fff3cd; color: #856404; }
+.cancelled { background: #f8d7da; color: #721c24; }
+
+.empty {
+    text-align: center;
+    color: #999;
+    margin-top: 50px;
+}
+</style>
+
+<div class="container">
+    <div class="title">Appointments</div>
+
+    {% if appointments %}
+    <div class="grid">
+        {% for a in appointments %}
+        <div class="card">
+
+            <h5>{{ a.therapy.name }}</h5>
+            <p>{{ a.date|date:"M d, Y • H:i" }}</p>
+
+            <p>
+                {% if a.status == "Completed" %}
+                    <span class="status completed">Completed</span>
+                {% elif a.status == "Pending" %}
+                    <span class="status pending">Pending</span>
+                {% else %}
+                    <span class="status cancelled">{{ a.status }}</span>
+                {% endif %}
+            </p>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <div class="empty">
+            <h5>No Appointments</h5>
+            <p>Appointments will appear here.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

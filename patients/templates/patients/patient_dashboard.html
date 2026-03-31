@@ -1,0 +1,189 @@
+{% extends 'patients/base_patient.html' %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+    
+    <!-- 🔷 Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Welcome, {{ patient.name }}</h2>
+            <p class="text-muted mb-0">Track your appointments and health progress</p>
+        </div>
+
+        <a href="{% url 'patient_logout' %}" class="btn btn-outline-dark">
+            Logout
+        </a>
+    </div>
+
+    <!-- 🔷 Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="text-muted">Total Appointments</h6>
+                <h3>{{ appointments|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="text-muted">Upcoming</h6>
+                <h3>
+                    {{ appointments|dictsort:"date"|length }}
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="text-muted">Completed</h6>
+                <h3>
+                    {{ appointments|dictsort:"status"|length }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔷 Appointments Section -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between mb-3">
+                <h5 class="mb-0">Your Appointments</h5>
+            </div>
+
+            {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Therapy</th>
+                            <th>Status</th>
+                            <th>Doctor Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in appointments %}
+                        <tr>
+                            <td>{{ a.date }}</td>
+                            <td>{{ a.time }}</td>
+                            <td>{{ a.therapy.name }}</td>
+
+                            <!-- 🔷 Status Badge -->
+                            <td>
+                                {% if a.status == "Pending" %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif a.status == "Completed" %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif a.status == "Cancelled" %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% else %}
+                                    {{ a.status }}
+                                {% endif %}
+                            </td>
+
+                            <!-- 🔷 Prescription Button -->
+                            <td>
+                                {% if a.prescription %}
+                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#prescriptionModal{{ a.id }}">
+                                        View
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted">Not Available</span>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> <!-- table-responsive -->
+
+            <!-- 🔷 Prescription Modals -->
+            {% for a in appointments %}
+                {% if a.prescription %}
+                <div class="modal fade" id="prescriptionModal{{ a.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title">Prescription</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <p>{{ a.prescription.notes }}</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted">No appointments found.</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3">
+            <h6 class="fw-bold">Prescriptions</h6>
+            {% if prescriptions %}
+                <ul class="list-group list-group-flush">
+                    {% for p in prescriptions %}
+                        <li class="list-group-item">
+                            <a href="{{ p.file.url }}" target="_blank">
+                                {{ p.name|default:"View Prescription" }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No prescriptions available.</p>
+            {% endif %}
+        </div>
+    </div>
+    <!-- 🔷 Future Features Section (UI Ready) -->
+    <div class="row mt-4">
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+                <h6 class="fw-bold">Diet Plan</h6>
+                <p class="text-muted">Your therapy-based diet plan will appear here.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+                <h6 class="fw-bold">Precautions</h6>
+                {% for precaution in precautions %}
+                    <div class="mb-3">
+                        <strong>{{ precaution.title }}</strong>
+
+                        {% if precaution.before_therapy %}
+                            <p class="mb-1"><strong>Before:</strong> {{ precaution.before_therapy }}</p>
+                        {% endif %}
+
+                        {% if precaution.after_therapy %}
+                            <p class="mb-1"><strong>After:</strong> {{ precaution.after_therapy }}</p>
+                        {% endif %}
+
+                        <hr>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No precautions available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

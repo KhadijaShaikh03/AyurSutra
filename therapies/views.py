@@ -5,6 +5,7 @@ import calendar
 from django.db.models import Q
 from django import forms
 from .forms import AppointmentForm
+from django.http import JsonResponse
 
 
 def therapy_list(request):
@@ -52,9 +53,9 @@ def appointment_calendar(request):
     appointment_dict = {}
     for appt in appointments:
       day = appt.date.day   # ✅ INDENTED
-    if day not in appointment_dict:
+      if day not in appointment_dict:
         appointment_dict[day] = []
-    appointment_dict[day].append(appt)
+      appointment_dict[day].append(appt)
 
     context = {
         'calendar': cal,
@@ -68,28 +69,56 @@ def appointment_detail(request, pk):
     return render(request, 'therapies/appointment_detail.html', {
         'appointment': appointment
     })
-def add_appointment(request):
-    form = AppointmentForm(request.POST or None)
+def appointment_edit(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    form = AppointmentForm(request.POST or None, instance=appointment)
 
-    if request.method == 'POST':
-      form = AppointmentForm(request.POST)
     if form.is_valid():
-        appointment = form.save(commit=False)
-        appointment.status = form.cleaned_data['status']   # ✅ force save
-        appointment.save()
+        form.save()
         return redirect('appointments')
-    else:
-      form = AppointmentForm()
 
-    return render(request, 'therapies/appointment_form.html', {
-        'form': form
-    })
+    return render(request, 'therapies/appointment_form.html', {'form': form})
+
+
+def delete_appointment(request, pk):
+    appt = get_object_or_404(Appointment, pk=pk)
+    appt.delete()
+    return redirect('appointments')
+
 def update_status(request, pk):
     appt = Appointment.objects.get(pk=pk)
-
     if request.method == "POST":
         new_status = request.POST.get('status')
         appt.status = new_status
         appt.save()
+        return redirect('appointments')   # ✅ FIX
 
+    return redirect('appointments')
+def edit_appointment(request, pk):
+    appt = get_object_or_404(Appointment, pk=pk)
+    form = AppointmentForm(request.POST or None, instance=appt)
+
+    if form.is_valid():
+        form.save()
+        return redirect('appointments')
+
+    return render(request, 'therapies/appointment_form.html', {'form': form})
+
+    return render(request, 'therapies/appointment_form.html', {'form': form})
+def add_appointment(request):
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            form.save()   # ✅ no need to manually set status
+            return redirect('appointments')
+    else:
+        form = AppointmentForm()
+
+    return render(request, 'therapies/appointment_form.html', {
+        'form': form
+    })
+
+def appointment_delete(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    appointment.delete()
     return redirect('appointments')

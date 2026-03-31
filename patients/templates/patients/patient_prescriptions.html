@@ -1,0 +1,63 @@
+{% extends 'patients/base_patient.html' %}
+
+{% block content %}
+
+<style>
+.container { padding: 20px; }
+.title { font-size: 24px; font-weight: 600; margin-bottom: 20px; }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    border-left: 5px solid #3498db;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.label {
+    font-weight: 600;
+}
+
+.empty {
+    text-align: center;
+    color: #999;
+    margin-top: 50px;
+}
+</style>
+
+<div class="container">
+    <div class="title">Prescriptions</div>
+
+    {% if prescriptions %}
+    <div class="grid">
+        {% for p in prescriptions %}
+        <div class="card">
+
+            <h5>{{ p.medicine_name }}</h5>
+            <p><span class="label">Dosage:</span> {{ p.dosage }}</p>
+            <p><span class="label">Instructions:</span> {{ p.instructions }}</p>
+            <p><span class="label">Date:</span> {{ p.appointment.date|date:"M d, Y" }}</p>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <div class="empty">
+            <h5>No Prescriptions</h5>
+            <p>Doctor prescriptions will appear here.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

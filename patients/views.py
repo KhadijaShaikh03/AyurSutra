@@ -2,12 +2,20 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from .models import Patient
 from .forms import PatientForm
-from therapies.models import Therapy, Appointment
+from therapies.models import Therapy, Appointment, Precaution
 from datetime import date
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from therapies.models import Appointment
+from therapies.models import Prescription, Precaution
 
 
-# LIST
+
 def patient_list(request):
+    if hasattr(request.user, 'patient') and not request.user.is_staff:
+        return redirect('patient_dashboard')
     query = request.GET.get('q')
 
     patients = Patient.objects.all()
@@ -20,17 +28,48 @@ def patient_list(request):
         'query': query
     })
 
-# ADD
+
 def add_patient(request):
+    if hasattr(request.user, 'patient') and not request.user.is_staff:
+        return redirect('patient_dashboard')
     form = PatientForm(request.POST or None)
+
     if form.is_valid():
-        form.save()
-        return redirect('patients')  # ✅ FIXED
+        patient = form.save(commit=False)  # ⬅️ IMPORTANT
+
+        phone = patient.phone
+        email = patient.email
+
+        username = phone
+        password = phone  # basic for now
+
+        # Prevent duplicate users
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "User already exists with this phone number.")
+            return redirect('patients')
+
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=email
+        )
+
+        # Link user to patient
+        patient.user = user
+        patient.save()
+
+        messages.success(request, f"Patient created. Login username: {username}")
+
+        return redirect('patients')
+
     return render(request, 'patients/patient_form.html', {'form': form})
 
 
 # EDIT
 def edit_patient(request, pk):
+    if hasattr(request.user, 'patient') and not request.user.is_staff:
+        return redirect('patient_dashboard')
     patient = get_object_or_404(Patient, pk=pk)
     form = PatientForm(request.POST or None, instance=patient)
     if form.is_valid():
@@ -40,7 +79,10 @@ def edit_patient(request, pk):
 
 
 # DELETE
+
 def delete_patient(request, pk):
+    if hasattr(request.user, 'patient') and not request.user.is_staff:
+        return redirect('patient_dashboard')
     patient = get_object_or_404(Patient, pk=pk)
     if request.method == 'POST':
         patient.delete()
@@ -49,8 +91,10 @@ def delete_patient(request, pk):
 
 
 # DASHBOARD
-def dashboard(request):
 
+def dashboard(request):
+    if hasattr(request.user, 'patient'):
+        return redirect('patient_dashboard')
     # Stats
     total_patients = Patient.objects.count()
     total_therapies = Therapy.objects.count()
@@ -89,3 +133,67 @@ def dashboard(request):
     }
 
     return render(request, 'patients/dashboard.html', context)
+
+@login_required
+def patient_dashboard(request):
+    if not hasattr(request.user, 'patient'):
+        return redirect('dashboard')  # block non-patient users
+
+    patient = request.user.patient
+    appointments = patient.appointments.all().select_related('therapy').order_by('-date', '-time')
+
+    # Get unique therapies from appointments
+    therapies = set(appointment.therapy for appointment in appointments if appointment.therapy)
+
+    # Fetch precautions related to these therapies
+    precautions = Precaution.objects.filter(therapy__in=therapies)
+
+    # Collect prescriptions if they exist
+    prescriptions = [a.prescription for a in appointments if a.prescription]
+
+    return render(request, "patients/patient_dashboard.html", {
+        "patient": patient,
+        "appointments": appointments,
+        "precautions": precautions, 
+        "prescriptions": prescriptions,
+    })
+
+@login_required
+def patient_diet_plan(request):
+    patient = request.user.patient
+    return render(request, "patients/patient_diet_plan.html", {"patient": patient})
+
+@login_required
+def patient_prescriptions(request):
+    patient = request.user.patient
+
+    prescriptions = Prescription.objects.filter(
+    appointment__patient=patient
+).order_by('-created_at')
+
+    return render(request, 'patients/patient_prescriptions.html', {
+        'prescriptions': prescriptions
+    })
+
+@login_required
+def patient_precautions(request):
+    patient = request.user.patient
+    appointments = patient.therapy_appointments.all()
+    therapies = [appt.therapy for appt in appointments]
+    precautions = Precaution.objects.filter(therapy__in=therapies).distinct()
+    return render(request, "patients/patient_precautions.html", {"precautions": precautions})
+
+#@login_required
+#def appointments_list(request):
+ #   patient = request.user.patient
+  #  appointments = patient.therapy_appointments.all().order_by('-date', '-time')  # latest first
+   # return render(request, "patients/appointments_list.html", {"appointments": appointments})#
+
+@login_required
+def patient_appointments(request):
+    patient = request.user.patient
+    appointments = Appointment.objects.filter(patient=patient).select_related('therapy')
+
+    return render(request, 'patients/patient_appointments.html', {
+        'appointments': appointments
+    })

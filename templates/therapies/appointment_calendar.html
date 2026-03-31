@@ -2,23 +2,27 @@
 {% load custom_tags %}
 
 {% block content %}
-<div class="main-content">
+<div class="main-content container my-4">
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Appointment Calendar</h2>
+        <a href="{% url 'appointments' %}" class="btn btn-dark">📋 List View</a>
+    </div>
 
-        <a href="{% url 'appointments' %}" class="btn btn-dark">
-            📋 List View
-        </a>
+    <!-- Back / Cancel Button -->
+    <div class="mb-3">
+        <a href="{% url 'appointments' %}" class="btn btn-secondary">
+    ← Back
+</a>
     </div>
 
     <!-- Calendar Card -->
     <div class="card">
-        <div class="card-body">
+        <div class="card-body p-2">
 
-            <table class="table table-bordered text-center">
-                <thead>
+            <table class="table table-bordered calendar-table">
+                <thead class="table-light">
                     <tr>
                         <th>Mon</th>
                         <th>Tue</th>
@@ -34,35 +38,75 @@
                     {% for week in calendar %}
                     <tr>
                         {% for day in week %}
-                        <td style="height:120px; vertical-align: top;">
-
+                        <td style="height:140px; vertical-align: top; padding:5px;">
                             {% if day != 0 %}
-                                <strong>{{ day }}</strong>
+                                <div class="fw-bold mb-1">{{ day }}</div>
 
-                                <!-- ✅ CORRECT LOGIC -->
                                 {% for appt in appointment_dict|get_item:day %}
-                                <a href="{% url 'appointment_detail' appt.id %}" style="text-decoration:none;">
-                                    <div class="small bg-success text-white p-1 mt-1 rounded">
-                                        {{ appt.patient }}
+                                    <div class="appointment-card border rounded p-1 mb-1 bg-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                            {{ appt.patient }}
+                                            <span class="text-muted">{{ appt.time }}</span>
+                                        </div>
+
+                                        <!-- Status Dropdown -->
+                                        <select class="form-select form-select-sm mb-1" onchange="updateStatus({{ appt.id }}, this.value)">
+                                            <option value="Pending" {% if appt.status == 'Pending' %}selected{% endif %}>Scheduled</option>
+                                            <option value="Completed" {% if appt.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                            <option value="Cancelled" {% if appt.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                        </select>
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{% url 'appointment_detail' appt.id %}" class="btn btn-sm btn-info">Details</a>
+                                            <a href="{% url 'appointment_edit' appt.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="{% url 'appointment_delete' appt.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                        </div>
                                     </div>
-                                </a>
                                 {% empty %}
-                            {% endfor %}
-                                    <!-- No appointments -->
+                                    <small class="text-muted">No appointments</small>
                                 {% endfor %}
 
                             {% endif %}
-
                         </td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
                 </tbody>
-
             </table>
 
         </div>
     </div>
 
 </div>
+
+<!-- JS for Status Update -->
+<script>
+function updateStatus(appointmentId, status) {
+    fetch(`/therapies/update_status/${appointmentId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => console.log('Status updated:', data))
+    .catch(error => alert(error));
+}
+</script>
+
+<style>
+.appointment-card {
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+.appointment-card select {
+    font-size: 0.8rem;
+}
+.table td {
+    vertical-align: top;
+}
+</style>
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Appointment, Therapy
-
+from .models import Precaution
+from .models import Prescription
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
@@ -32,3 +33,13 @@ class AppointmentAdmin(admin.ModelAdmin):
 class TherapyAdmin(admin.ModelAdmin):
     list_display = ('therapy_name', 'duration')
     search_fields = ('therapy_name',)
+
+@admin.register(Precaution)
+class PrecautionAdmin(admin.ModelAdmin):
+    list_display = ['therapy', 'title']
+    list_filter = ['therapy']
+    search_fields = ['title']
+
+@admin.register(Prescription)
+class PrescriptionAdmin(admin.ModelAdmin):
+    list_display = ['medicine_name', 'created_at']
