@@ -93,51 +93,54 @@ def delete_patient(request, pk):
 # DASHBOARD
 
 def dashboard(request):
-    if hasattr(request.user, 'patient'):
+
+    if request.user.is_staff or request.user.is_superuser:
+        # ADMIN / DOCTOR DASHBOARD
+
+        total_patients = Patient.objects.count()
+        total_therapies = Therapy.objects.count()
+        total_appointments = Appointment.objects.count()
+
+        gender_data = Patient.objects.values('gender').annotate(count=Count('gender'))
+        gender_labels = [g['gender'] for g in gender_data]
+        gender_counts = [g['count'] for g in gender_data]
+
+        status_data = Appointment.objects.values('status').annotate(count=Count('status'))
+        status_labels = [s['status'] for s in status_data]
+        status_counts = [s['count'] for s in status_data]
+
+        today = date.today()
+
+        context = {
+            'total_patients': total_patients,
+            'total_therapies': total_therapies,
+            'total_appointments': total_appointments,
+
+            'today_appointments': Appointment.objects.filter(date=today),
+            'upcoming_appointments': Appointment.objects.filter(date__gte=today)[:5],
+
+            'gender_labels': gender_labels,
+            'gender_counts': gender_counts,
+
+            'status_labels': status_labels,
+            'status_counts': status_counts,
+
+            'pending_count': Appointment.objects.filter(status='PENDING').count(),
+            'completed_count': Appointment.objects.filter(status='COMPLETED').count(),
+            'cancelled_count': Appointment.objects.filter(status='CANCELLED').count(),
+        }
+
+        return render(request, 'patients/dashboard.html', context)
+
+    else:
+        # PATIENT USER
         return redirect('patient_dashboard')
-    # Stats
-    total_patients = Patient.objects.count()
-    total_therapies = Therapy.objects.count()
-    total_appointments = Appointment.objects.count()
 
-    # Gender chart
-    gender_data = Patient.objects.values('gender').annotate(count=Count('gender'))
-    gender_labels = [g['gender'] for g in gender_data]
-    gender_counts = [g['count'] for g in gender_data]
-
-    # Status chart
-    status_data = Appointment.objects.values('status').annotate(count=Count('status'))
-    status_labels = [s['status'] for s in status_data]
-    status_counts = [s['count'] for s in status_data]
-
-    # NEW: Today's appointments
-    today = date.today()
-
-    context = {
-        'total_patients': Patient.objects.count(),
-        'total_therapies': Therapy.objects.count(),
-        'total_appointments': Appointment.objects.count(),
-
-        'today_appointments': Appointment.objects.filter(date=today),
-        'upcoming_appointments': Appointment.objects.filter(date__gte=today)[:5],
-
-        'gender_labels': gender_labels,
-        'gender_counts': gender_counts,
-
-        'status_labels': status_labels,
-        'status_counts': status_counts,
-
-        'pending_count': Appointment.objects.filter(status='PENDING').count(),
-        'completed_count': Appointment.objects.filter(status='COMPLETED').count(),
-        'cancelled_count': Appointment.objects.filter(status='CANCELLED').count(),
-    }
-
-    return render(request, 'patients/dashboard.html', context)
 
 @login_required
 def patient_dashboard(request):
     if not hasattr(request.user, 'patient'):
-        return redirect('dashboard')  # block non-patient users
+       return redirect('dashboard')  # block non-patient users
 
     patient = request.user.patient
     appointments = patient.appointments.all().select_related('therapy').order_by('-date', '-time')
