@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from therapies.models import Appointment
 from therapies.models import Prescription, Precaution
+from django.contrib.auth import authenticate, login
 
 
 
@@ -90,12 +91,14 @@ def delete_patient(request, pk):
     return render(request, 'patients/patient_confirm_delete.html', {'patient': patient})
 
 
-# DASHBOARD
-
+@login_required
 def dashboard(request):
-
+    # 🔥 FORCE admin redirect away from /admin/
+    if request.path.startswith('/admin'):
+        return redirect('/dashboard/')
+    # 🔹 ADMIN / DOCTOR
     if request.user.is_staff or request.user.is_superuser:
-        # ADMIN / DOCTOR DASHBOARD
+
 
         total_patients = Patient.objects.count()
         total_therapies = Therapy.objects.count()
@@ -132,21 +135,32 @@ def dashboard(request):
 
         return render(request, 'patients/dashboard.html', context)
 
-    else:
-        # PATIENT USER
+    # 🔹 PATIENT USER
+    elif hasattr(request.user, 'patient'):
         return redirect('patient_dashboard')
 
+    # 🔹 FALLBACK (IMPORTANT — prevents loop)
+    else:
+        return redirect('patient_login')
+
+def home(request):
+    return render(request, 'patients/home.html')
 
 @login_required
 def patient_dashboard(request):
+
+    # 🔴 IMPORTANT FIX (NO LOOP NOW)
     if not hasattr(request.user, 'patient'):
-       return redirect('dashboard')  # block non-patient users
+        return redirect('patient_login')
 
     patient = request.user.patient
+
     appointments = patient.appointments.all().select_related('therapy').order_by('-date', '-time')
 
     # Get unique therapies from appointments
-    therapies = set(appointment.therapy for appointment in appointments if appointment.therapy)
+    therapies = set(
+        appointment.therapy for appointment in appointments if appointment.therapy
+    )
 
     # Fetch precautions related to these therapies
     precautions = Precaution.objects.filter(therapy__in=therapies)
@@ -157,7 +171,7 @@ def patient_dashboard(request):
     return render(request, "patients/patient_dashboard.html", {
         "patient": patient,
         "appointments": appointments,
-        "precautions": precautions, 
+        "precautions": precautions,
         "prescriptions": prescriptions,
     })
 
@@ -200,3 +214,24 @@ def patient_appointments(request):
     return render(request, 'patients/patient_appointments.html', {
         'appointments': appointments
     })
+
+
+def patient_login(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+
+            if hasattr(user, 'patient'):
+                return redirect('patient_dashboard')
+            else:
+                return redirect('dashboard')
+
+        else:
+            return render(request, 'patients/login.html', {'error': 'Invalid credentials'})
+
+    return render(request, 'patients/login.html')

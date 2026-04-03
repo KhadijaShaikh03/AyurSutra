@@ -16,7 +16,7 @@ class Patient(models.Model):
     address = models.TextField()
     medical_history = models.TextField(blank=True)
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='patient')
 
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15)

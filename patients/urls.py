@@ -4,6 +4,7 @@ from . import auth_views
 
 urlpatterns = [
     path('', views.patient_list, name='patients'),
+    path('dashboard/', views.patient_dashboard, name='patient_dashboard'),
     path('add/', views.add_patient, name='add_patient'),
     path('edit/<int:pk>/', views.edit_patient, name='edit_patient'),
     path('delete/<int:pk>/', views.delete_patient, name='delete_patient'),
