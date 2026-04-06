@@ -2,21 +2,65 @@
 
 {% block content %}
 
-<h2 class="mb-4">Patient Form</h2>
+<div class="container mt-4">
 
-<div class="card">
-    <div class="card-body">
+    <h2 class="mb-4 fw-bold text-primary">Patient Form</h2>
 
-        <form method="POST">
-            {% csrf_token %}
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
 
-            {{ form.as_p }}
+            <form method="POST">
+                {% csrf_token %}
 
-            <button type="submit" class="btn btn-success">Save</button>
-            <a href="/patients/" class="btn btn-secondary">Cancel</a>
-        </form>
+                {% for field in form %}
+                    <div class="mb-3">
 
+                        <label class="form-label fw-semibold">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/patients/" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-success px-4">
+                        Save
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
     </div>
+
 </div>
+
+<!-- Local styling (no base.html change) -->
+<style>
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: #198754;
+        box-shadow: 0 0 4px rgba(25, 135, 84, 0.25);
+        outline: none;
+    }
+</style>
 
 {% endblock %}

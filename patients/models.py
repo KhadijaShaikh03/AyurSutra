@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.core.validators import RegexValidator
+phone_validator = RegexValidator(
+    regex=r'^\d{10}$',
+    message="Phone number must be exactly 10 digits"
+)
 class Patient(models.Model):
 
     GENDER_CHOICES = [
@@ -12,10 +16,10 @@ class Patient(models.Model):
     name = models.CharField(max_length=100)
     age = models.IntegerField()
     gender = models.CharField(max_length=25, choices=GENDER_CHOICES)
-    phone = models.CharField(max_length=15)
-    address = models.TextField()
-    medical_history = models.TextField(blank=True)
-
+    phone = models.CharField(max_length=10, validators=[phone_validator])
+    def save(self, *args, **kwargs):
+        self.full_clean()   # 🔥 THIS IS CRITICAL
+        super().save(*args, **kwargs)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='patient')
 
     name = models.CharField(max_length=100)

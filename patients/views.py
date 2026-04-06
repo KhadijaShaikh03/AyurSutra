@@ -20,6 +20,11 @@ def patient_list(request):
     query = request.GET.get('q')
 
     patients = Patient.objects.all()
+    for patient in patients:
+        therapies = Appointment.objects.filter(patient=patient)\
+            .values_list('therapy__therapy_name', flat=True)
+
+        patient.therapy_list = ", ".join(set(therapies)) if therapies else "No Therapy"
 
     if query:
         patients = patients.filter(name__icontains=query)
@@ -36,8 +41,7 @@ def add_patient(request):
     form = PatientForm(request.POST or None)
 
     if form.is_valid():
-        patient = form.save(commit=False)  # ⬅️ IMPORTANT
-
+        patient = form.save(commit=False)
         phone = patient.phone
         email = patient.email
 

@@ -35,16 +35,10 @@
                     <td>{{ patient.phone }}</td>
 
                     <!-- 🔥 THERAPY VIA APPOINTMENTS -->
+           
                     <td>
-                        {% for appt in patient.appointment_set.all %}
-                            <span class="badge bg-success">
-                                {{ appt.therapy.therapy_name }}
-                            </span>
-                        {% empty %}
-                            <span class="text-muted">No Therapy</span>
-                        {% endfor %}
+                        {{ patient.therapy_list }}
                     </td>
-
                     <td>
                         <a href="{% url 'edit_patient' patient.id %}" class="btn btn-sm btn-warning">
                             Edit
