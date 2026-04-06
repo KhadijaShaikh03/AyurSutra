@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from django.db import models
+
 phone_validator = RegexValidator(
     regex=r'^\d{10}$',
     message="Phone number must be exactly 10 digits"
@@ -22,8 +24,6 @@ class Patient(models.Model):
         super().save(*args, **kwargs)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='patient')
 
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
     email = models.EmailField(blank=True, null=True)
 
     def __str__(self):
@@ -46,3 +46,61 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.patient.name} - {self.therapy} on {self.date}"
+    
+# ==============================
+# 🔔 REMINDER MODEL
+# ==============================
+class Reminder(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='reminders')
+    appointment = models.ForeignKey(Appointment, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    
+    reminder_date = models.DateField()
+    reminder_time = models.TimeField()
+
+    is_completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.title} - {self.patient.name}"
+
+
+# ==============================
+# ⚠️ PRECAUTION MODEL
+# ==============================
+class Precaution(models.Model):
+    therapy = models.ForeignKey(
+    Therapy,
+    on_delete=models.CASCADE,
+    related_name='precautions',
+    null=True,
+    blank=True
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"{self.title} - {self.therapy.therapy_name}"
+
+
+# ==============================
+# 🥗 DIET PLAN MODEL
+# ==============================
+class DietPlan(models.Model):
+    therapy = models.ForeignKey(
+    Therapy,
+    on_delete=models.CASCADE,
+    related_name='diet_plans',
+    null=True,
+    blank=True
+    )
+    morning = models.TextField(blank=True)
+    afternoon = models.TextField(blank=True)
+    evening = models.TextField(blank=True)
+    night = models.TextField(blank=True)
+
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Diet Plan for {self.therapy.therapy_name}"
