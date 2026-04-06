@@ -11,9 +11,8 @@ from django.shortcuts import render, redirect
 from therapies.models import Appointment
 from therapies.models import Prescription, Precaution
 from django.contrib.auth import authenticate, login
-from django.db import models
-from .models import DietPlan
-from therapies.models import Precaution
+
+
 
 def patient_list(request):
     if hasattr(request.user, 'patient') and not request.user.is_staff:
@@ -151,49 +150,33 @@ def dashboard(request):
 def home(request):
     return render(request, 'patients/home.html')
 
-
 @login_required
 def patient_dashboard(request):
 
+    # 🔴 IMPORTANT FIX (NO LOOP NOW)
     if not hasattr(request.user, 'patient'):
         return redirect('patient_login')
 
     patient = request.user.patient
 
-    appointments = patient.therapy_appointments.all()\
-        .select_related('therapy')\
-        .order_by('-date', '-time')
-    pending_count = appointments.filter(status="Pending").count()
-    completed_count = appointments.filter(status="Completed").count()
+    appointments = patient.appointments.all().select_related('therapy').order_by('-date', '-time')
 
-    therapies = [appt.therapy for appt in appointments if appt.therapy]
+    # Get unique therapies from appointments
+    therapies = set(
+        appointment.therapy for appointment in appointments if appointment.therapy
+    )
 
-    from therapies.models import Precaution
-    precautions = Precaution.objects.filter(
-        therapy__in=therapies
-    ).distinct()
+    # Fetch precautions related to these therapies
+    precautions = Precaution.objects.filter(therapy__in=therapies)
 
-    # ✅ SAFE PRESCRIPTION HANDLING
-    prescriptions = []
-    try:
-        from therapies.models import Prescription
-        prescriptions = Prescription.objects.filter(
-            appointment__patient=patient
-        ).order_by('-created_at')
-    except Exception as e:
-        print("Prescription error:", e)
-
-    diet_plans = []
+    # Collect prescriptions if they exist
+    prescriptions = [a.prescription for a in appointments if a.prescription]
 
     return render(request, "patients/patient_dashboard.html", {
         "patient": patient,
         "appointments": appointments,
         "precautions": precautions,
         "prescriptions": prescriptions,
-        "diet_plans": diet_plans,
-        "pending_count": pending_count,
-        "completed_count": completed_count,
-        "reminders": []
     })
 
 @login_required

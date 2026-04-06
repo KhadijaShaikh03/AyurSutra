@@ -49,7 +49,7 @@ class Precaution(models.Model):
     
 class Prescription(models.Model):
     appointment = models.ForeignKey(
-        'patients.Appointment',
+        Appointment,
         on_delete=models.CASCADE,
         related_name='prescriptions'
     )
@@ -61,21 +61,3 @@ class Prescription(models.Model):
 
     def __str__(self):
         return self.medicine_name
-    
-class DietPlan(models.Model):
-    therapy = models.ForeignKey(
-    Therapy,
-    on_delete=models.CASCADE,
-    related_name='diet_plans',
-    null=True,
-    blank=True
-    )
-    morning = models.TextField(blank=True)
-    afternoon = models.TextField(blank=True)
-    evening = models.TextField(blank=True)
-    night = models.TextField(blank=True)
-
-    notes = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Diet Plan for {self.therapy.therapy_name}"
