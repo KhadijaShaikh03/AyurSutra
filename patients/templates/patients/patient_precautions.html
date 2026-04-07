@@ -1,138 +1,75 @@
 {% extends 'patients/base_patient.html' %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Patient Precautions</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom Styling -->
-    <style>
-        body {
-            background: #f5f7fb;
-            font-family: 'Segoe UI', sans-serif;
-        }
+<style>
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        background: #fff;
+    }
 
-        .page-title {
-            font-weight: 700;
-            color: #2c3e50;
-        }
+    .section-box {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
 
-        .card-custom {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
-        }
+    .before-box {
+        background: #fff3cd;
+    }
 
-        .card-custom:hover {
-            transform: translateY(-5px);
-        }
+    .after-box {
+        background: #d1ecf1;
+    }
+</style>
 
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #6c757d;
-            text-transform: uppercase;
-        }
+<div class="container py-4">
 
-        .section-content {
-            font-size: 15px;
-            color: #2d3436;
-        }
+    <h2 class="mb-4">Precautions</h2>
 
-        .badge-therapy {
-            background-color: #6c5ce7;
-            font-size: 12px;
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
+    <div class="row g-4">
 
-        .empty-state {
-            text-align: center;
-            padding: 60px;
-            color: #999;
-        }
-    </style>
-</head>
+        <!-- BEFORE THERAPY -->
+        <div class="col-md-6">
+            <div class="card card-custom p-3">
+                <h5 class="mb-3">Before Therapy</h5>
 
-<body>
-
-<div class="container py-5">
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="page-title">Precautions</h2>
-        <span class="badge bg-primary px-3 py-2">
-            Total: {{ precautions|length }}
-        </span>
-    </div>
-
-    {% if precautions %}
-        <div class="row g-4">
-
-            {% for precaution in precautions %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card card-custom p-4 h-100">
-
-                    <!-- Title -->
-                    <div class="mb-3">
-                        <h5 class="fw-bold">{{ precaution.title }}</h5>
-                        <span class="badge badge-therapy">
-                            {{ precaution.therapy.therapy_name }}
-                        </span>
-                    </div>
-
-                    <!-- Before Therapy -->
-                    {% if precaution.before_therapy %}
-                    <div class="mb-3">
-                        <div class="section-title">Before Therapy</div>
-                        <div class="section-content">
-                            {{ precaution.before_therapy }}
+                {% if before_precautions %}
+                    {% for p in before_precautions %}
+                        <div class="section-box before-box">
+                            <strong>{{ p.therapy.therapy_name }}</strong><br>
+                            {{ p.text }}
                         </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- After Therapy -->
-                    {% if precaution.after_therapy %}
-                    <div class="mb-3">
-                        <div class="section-title">After Therapy</div>
-                        <div class="section-content">
-                            {{ precaution.after_therapy }}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- General Notes -->
-                    {% if precaution.general_notes %}
-                    <div>
-                        <div class="section-title">General Notes</div>
-                        <div class="section-content">
-                            {{ precaution.general_notes }}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No before therapy precautions</p>
+                {% endif %}
             </div>
-            {% endfor %}
-
         </div>
 
-    {% else %}
-        <!-- Empty State -->
-        <div class="empty-state">
-            <h4>No Precautions Found</h4>
-            <p>Your doctor has not added any precautions yet.</p>
+        <!-- AFTER THERAPY -->
+        <div class="col-md-6">
+            <div class="card card-custom p-3">
+                <h5 class="mb-3">After Therapy</h5>
+
+                {% if after_precautions %}
+                    {% for p in after_precautions %}
+                        <div class="section-box after-box">
+                            <strong>{{ p.therapy.therapy_name }}</strong><br>
+                            {{ p.text }}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No after therapy precautions</p>
+                {% endif %}
+            </div>
         </div>
-    {% endif %}
+
+    </div>
 
 </div>
 
-</body>
-</html>
 {% endblock %}

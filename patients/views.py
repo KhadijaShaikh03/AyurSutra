@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from .models import Patient
 from .forms import PatientForm
-from therapies.models import Therapy, Appointment, Precaution
+from therapies.models import Therapy, Appointment, Precaution,DietPlan
 from datetime import date
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -11,9 +11,9 @@ from django.shortcuts import render, redirect
 from therapies.models import Appointment
 from therapies.models import Prescription, Precaution
 from django.contrib.auth import authenticate, login
+from therapies.models import TherapyPrecaution
 
-
-
+@login_required
 def patient_list(request):
     if hasattr(request.user, 'patient') and not request.user.is_staff:
         return redirect('patient_dashboard')
@@ -162,6 +162,7 @@ def patient_dashboard(request):
     appointments = patient.therapy_appointments.all()\
     .select_related('therapy')\
     .order_by('-date', '-time')
+    therapy_ids = appointments.values_list('therapy_id', flat=True)
     pending_count = appointments.filter(status="Pending").count()
     completed_count = appointments.filter(status="Completed").count()
     # Get unique therapies from appointments
@@ -170,19 +171,23 @@ def patient_dashboard(request):
     )
 
     # Fetch precautions related to these therapies
-    precautions = Precaution.objects.filter(
-    appointment__therapy__in=therapies
+    precautions = TherapyPrecaution.objects.filter(
+        therapy_id__in=therapy_ids
     )
 
+    before_precautions = precautions.filter(type='before')
+    after_precautions = precautions.filter(type='after')
+
     # Collect prescriptions if they exist
-    prescriptions = []
-    for a in appointments:
-        prescriptions.extend(a.prescriptions.all())
+    prescriptions = Prescription.objects.filter(
+        appointment__in=appointments
+    )
 
     return render(request, "patients/patient_dashboard.html", {
     "patient": patient,
     "appointments": appointments,
-    "precautions": precautions,
+    "before_precautions": before_precautions,
+    "after_precautions": after_precautions,
     "prescriptions": prescriptions,
     "diet_plans": [],
     "pending_count": pending_count,
@@ -207,17 +212,28 @@ def patient_prescriptions(request):
         'prescriptions': prescriptions
     })
 
+
+
+@login_required
 @login_required
 def patient_precautions(request):
     patient = request.user.patient
-    appointments = patient.therapy_appointments.all()
-    therapies = [appt.therapy for appt in appointments]
-    precautions = Precaution.objects.filter(therapy__in=therapies).distinct()
-    return render(request, "patients/patient_precautions.html", {"precautions": precautions})
 
+    appointments = patient.therapy_appointments.select_related('therapy')
+    therapy_ids = appointments.values_list('therapy_id', flat=True)
 
+    precautions = TherapyPrecaution.objects.filter(
+        therapy_id__in=therapy_ids
+    ).select_related('therapy')
 
+    # ✅ Separate before & after
+    before_precautions = precautions.filter(type='before')
+    after_precautions = precautions.filter(type='after')
 
+    return render(request, "patients/patient_precautions.html", {
+        "before_precautions": before_precautions,
+        "after_precautions": after_precautions
+    })
 @login_required
 def patient_appointments(request):
     patient = request.user.patient

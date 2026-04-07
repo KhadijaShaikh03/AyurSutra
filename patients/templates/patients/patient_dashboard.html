@@ -1,6 +1,19 @@
 {% extends 'patients/base_patient.html' %}
 {% block content %}
 
+<style>
+.container-fluid {
+    max-width: 1200px;
+    margin: auto;
+}
+body {
+    overflow-x: hidden;
+}
+.modal {
+    z-index: 1055 !important;
+}
+</style>
+
 <div class="container-fluid mt-4">
 
 <!-- 🔷 Header -->
@@ -50,9 +63,11 @@
 
 <div class="row g-4">
 
-    <!-- 🔷 Appointments -->
+    <!-- 🔷 LEFT SIDE -->
     <div class="col-lg-8">
-        <div class="card shadow-sm">
+
+        <!-- Appointments -->
+        <div class="card shadow-sm mb-4">
             <div class="card-body">
 
                 <h5 class="mb-3">Your Appointments</h5>
@@ -89,7 +104,7 @@
                                 </td>
 
                                 <td>
-                                    {% if a.prescriptions.all %}
+                                    {% if a.prescriptions.exists %}
                                         <button class="btn btn-sm btn-primary"
                                             data-bs-toggle="modal"
                                             data-bs-target="#prescriptionModal{{ a.id }}">
@@ -107,7 +122,7 @@
 
                 <!-- 🔷 Prescription Modals -->
                 {% for a in appointments %}
-                    {% if a.prescriptions.all %}
+                    {% if a.prescriptions.exists %}
                     <div class="modal fade" id="prescriptionModal{{ a.id }}" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -117,7 +132,10 @@
                                 </div>
                                 <div class="modal-body">
                                     {% for p in a.prescriptions.all %}
-                                        <p>{{ p.notes }}</p>
+                                        <p>
+                                            <strong>{{ p.medicine_name }}</strong><br>
+                                            Dosage: {{ p.dosage }}
+                                        </p>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -132,9 +150,38 @@
 
             </div>
         </div>
+
+        <!-- ⚠️ Precautions (Moved Below Appointments) -->
+        <div class="card shadow-sm p-3">
+            <h6 class="fw-bold">Precautions</h6>
+
+            <h6 class="mt-2 text-warning">Before Therapy</h6>
+            {% for p in before_precautions %}
+                <div class="mb-2">
+                    <strong>{{ p.therapy.therapy_name }}</strong>
+                    <p class="mb-1">{{ p.text }}</p>
+                </div>
+            {% empty %}
+                <p class="text-muted">No before therapy precautions</p>
+            {% endfor %}
+
+            <hr>
+
+            <h6 class="text-info">After Therapy</h6>
+            {% for p in after_precautions %}
+                <div class="mb-2">
+                    <strong>{{ p.therapy.therapy_name }}</strong>
+                    <p class="mb-1">{{ p.text }}</p>
+                </div>
+            {% empty %}
+                <p class="text-muted">No after therapy precautions</p>
+            {% endfor %}
+
+        </div>
+
     </div>
 
-    <!-- 🔷 Side Panel -->
+    <!-- 🔷 RIGHT SIDE -->
     <div class="col-lg-4">
 
         <!-- 🔔 Reminders -->
@@ -150,7 +197,8 @@
                 <ul class="list-group list-group-flush">
                     {% for p in prescriptions %}
                         <li class="list-group-item">
-                            {{ p.notes }}
+                            <strong>{{ p.medicine_name }}</strong><br>
+                            {{ p.dosage }}
                         </li>
                     {% endfor %}
                 </ul>
@@ -159,35 +207,6 @@
             {% endif %}
         </div>
 
-    </div>
-
-</div>
-
-<!-- 🔷 Bottom Section -->
-<div class="row mt-4 g-4">
-
-    <!-- 🥗 Diet Plans -->
-    <div class="col-md-6">
-        <div class="card shadow-sm p-3">
-            <h6 class="fw-bold">Diet Plans</h6>
-            <p class="text-muted">No diet plans available</p>
-        </div>
-    </div>
-
-    <!-- ⚠️ Precautions -->
-    <div class="col-md-6">
-        <div class="card shadow-sm p-3">
-            <h6 class="fw-bold">Precautions</h6>
-            {% for precaution in precautions %}
-                <div class="mb-3">
-                    <strong>{{ precaution.title }}</strong>
-                    <p class="mb-1">{{ precaution.description }}</p>
-                    <hr>
-                </div>
-            {% empty %}
-                <p class="text-muted">No precautions available.</p>
-            {% endfor %}
-        </div>
     </div>
 
 </div>
