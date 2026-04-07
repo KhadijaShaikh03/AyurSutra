@@ -2,145 +2,155 @@
 {% block content %}
 
 <div class="container-fluid mt-4">
-    
-    <!-- 🔷 Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold">Welcome, {{ patient.name }}</h2>
-            <p class="text-muted mb-0">Track your appointments and health progress</p>
-        </div>
 
-        <a href="{% url 'patient_logout' %}" class="btn btn-outline-dark">
-            Logout
-        </a>
+<!-- 🔷 Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">Welcome, {{ patient.name }}</h2>
+        <p class="text-muted mb-0">Track your appointments and health progress</p>
     </div>
 
-    <!-- 🔷 Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h6 class="text-muted">Total Appointments</h6>
-                <h3>{{ appointments|length }}</h3>
-            </div>
-        </div>
+    <a href="{% url 'patient_logout' %}" class="btn btn-outline-dark">
+        Logout
+    </a>
+</div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h6 class="text-muted">Upcoming</h6>
-                <h3>
-                    {{ appointments|dictsort:"date"|length }}
-                </h3>
-            </div>
-        </div>
+<!-- 🔷 Summary Cards -->
+<div class="row mb-4 g-3 text-center">
 
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h6 class="text-muted">Completed</h6>
-                <h3>
-                    {{ appointments|dictsort:"status"|length }}
-                </h3>
-            </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3 h-100">
+            <h6 class="text-muted">Total</h6>
+            <h3 class="fw-bold">{{ appointments|length }}</h3>
         </div>
     </div>
 
-    <!-- 🔷 Appointments Section -->
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3 h-100">
+            <h6 class="text-muted">Pending</h6>
+            <h3 class="fw-bold text-warning">{{ pending_count|length }}</h3>
+        </div>
+    </div>
 
-            <div class="d-flex justify-content-between mb-3">
-                <h5 class="mb-0">Your Appointments</h5>
-            </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3 h-100">
+            <h6 class="text-muted">Completed</h6>
+            <h3 class="fw-bold text-success">{{ completed_count|length }}</h3>
+        </div>
+    </div>
 
-            {% if appointments %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Therapy</th>
-                            <th>Status</th>
-                            <th>Doctor Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for a in appointments %}
-                        <tr>
-                            <td>{{ a.date }}</td>
-                            <td>{{ a.time }}</td>
-                            <td>{{ a.therapy.name }}</td>
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3 h-100">
+            <h6 class="text-muted">Reminders</h6>
+            <h3 class="fw-bold text-primary">{{ reminders|length }}</h3>
+        </div>
+    </div>
 
-                            <!-- 🔷 Status Badge -->
-                            <td>
-                                {% if a.status == "Pending" %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% elif a.status == "Completed" %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% elif a.status == "Cancelled" %}
-                                    <span class="badge bg-danger">Cancelled</span>
-                                {% else %}
-                                    {{ a.status }}
-                                {% endif %}
-                            </td>
+</div>
 
-                            <!-- 🔷 Prescription Button -->
-                            <td>
-                                {% if a.prescription %}
-                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#prescriptionModal{{ a.id }}">
-                                        View
-                                    </button>
-                                {% else %}
-                                    <span class="text-muted">Not Available</span>
-                                {% endif %}
-                            </td>
+<div class="row g-4">
 
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div> <!-- table-responsive -->
+    <!-- 🔷 Appointments -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
 
-            <!-- 🔷 Prescription Modals -->
-            {% for a in appointments %}
-                {% if a.prescription %}
-                <div class="modal fade" id="prescriptionModal{{ a.id }}" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
+                <h5 class="mb-3">Your Appointments</h5>
 
-                            <div class="modal-header">
-                                <h5 class="modal-title">Prescription</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                {% if appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Therapy</th>
+                                <th>Status</th>
+                                <th>Doctor Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in appointments %}
+                            <tr>
+                                <td>{{ a.date }}</td>
+                                <td>{{ a.time }}</td>
+                                <td>{{ a.therapy.therapy_name|default:"-" }}</td>
+
+                                <td>
+                                    {% if a.status == "Pending" %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif a.status == "Completed" %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif a.status == "Cancelled" %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% else %}
+                                        {{ a.status }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if a.prescriptions.all %}
+                                        <button class="btn btn-sm btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#prescriptionModal{{ a.id }}">
+                                            View
+                                        </button>
+                                    {% else %}
+                                        <span class="text-muted">Not Available</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 🔷 Prescription Modals -->
+                {% for a in appointments %}
+                    {% if a.prescriptions.all %}
+                    <div class="modal fade" id="prescriptionModal{{ a.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Prescription</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    {% for p in a.prescriptions.all %}
+                                        <p>{{ p.notes }}</p>
+                                    {% endfor %}
+                                </div>
                             </div>
-
-                            <div class="modal-body">
-                                <p>{{ a.prescription.notes }}</p>
-                            </div>
-
                         </div>
                     </div>
-                </div>
+                    {% endif %}
+                {% endfor %}
+
+                {% else %}
+                    <p class="text-muted text-center">No appointments found.</p>
                 {% endif %}
-            {% endfor %}
 
-            {% else %}
-                <div class="text-center py-4">
-                    <p class="text-muted">No appointments found.</p>
-                </div>
-            {% endif %}
-
+            </div>
         </div>
     </div>
 
-    <div class="col-md-4">
+    <!-- 🔷 Side Panel -->
+    <div class="col-lg-4">
+
+        <!-- 🔔 Reminders -->
+        <div class="card shadow-sm mb-4 p-3">
+            <h6 class="fw-bold">Reminders</h6>
+            <p class="text-muted">No reminders</p>
+        </div>
+
+        <!-- 🧾 Prescriptions -->
         <div class="card shadow-sm p-3">
             <h6 class="fw-bold">Prescriptions</h6>
             {% if prescriptions %}
                 <ul class="list-group list-group-flush">
                     {% for p in prescriptions %}
                         <li class="list-group-item">
-                            <a href="{{ p.file.url }}" target="_blank">
-                                {{ p.name|default:"View Prescription" }}
-                            </a>
+                            {{ p.notes }}
                         </li>
                     {% endfor %}
                 </ul>
@@ -148,41 +158,39 @@
                 <p class="text-muted">No prescriptions available.</p>
             {% endif %}
         </div>
-    </div>
-    <!-- 🔷 Future Features Section (UI Ready) -->
-    <div class="row mt-4">
-        
-        <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <h6 class="fw-bold">Diet Plan</h6>
-                <p class="text-muted">Your therapy-based diet plan will appear here.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <h6 class="fw-bold">Precautions</h6>
-                {% for precaution in precautions %}
-                    <div class="mb-3">
-                        <strong>{{ precaution.title }}</strong>
-
-                        {% if precaution.before_therapy %}
-                            <p class="mb-1"><strong>Before:</strong> {{ precaution.before_therapy }}</p>
-                        {% endif %}
-
-                        {% if precaution.after_therapy %}
-                            <p class="mb-1"><strong>After:</strong> {{ precaution.after_therapy }}</p>
-                        {% endif %}
-
-                        <hr>
-                    </div>
-                {% empty %}
-                    <p class="text-muted">No precautions available.</p>
-                {% endfor %}
-            </div>
-        </div>
 
     </div>
+
+</div>
+
+<!-- 🔷 Bottom Section -->
+<div class="row mt-4 g-4">
+
+    <!-- 🥗 Diet Plans -->
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <h6 class="fw-bold">Diet Plans</h6>
+            <p class="text-muted">No diet plans available</p>
+        </div>
+    </div>
+
+    <!-- ⚠️ Precautions -->
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <h6 class="fw-bold">Precautions</h6>
+            {% for precaution in precautions %}
+                <div class="mb-3">
+                    <strong>{{ precaution.title }}</strong>
+                    <p class="mb-1">{{ precaution.description }}</p>
+                    <hr>
+                </div>
+            {% empty %}
+                <p class="text-muted">No precautions available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
 
 </div>
 

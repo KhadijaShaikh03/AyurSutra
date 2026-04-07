@@ -159,25 +159,36 @@ def patient_dashboard(request):
 
     patient = request.user.patient
 
-    appointments = patient.appointments.all().select_related('therapy').order_by('-date', '-time')
-
+    appointments = patient.therapy_appointments.all()\
+    .select_related('therapy')\
+    .order_by('-date', '-time')
+    pending_count = appointments.filter(status="Pending").count()
+    completed_count = appointments.filter(status="Completed").count()
     # Get unique therapies from appointments
     therapies = set(
         appointment.therapy for appointment in appointments if appointment.therapy
     )
 
     # Fetch precautions related to these therapies
-    precautions = Precaution.objects.filter(therapy__in=therapies)
+    precautions = Precaution.objects.filter(
+    appointment__therapy__in=therapies
+    )
 
     # Collect prescriptions if they exist
-    prescriptions = [a.prescription for a in appointments if a.prescription]
+    prescriptions = []
+    for a in appointments:
+        prescriptions.extend(a.prescriptions.all())
 
     return render(request, "patients/patient_dashboard.html", {
-        "patient": patient,
-        "appointments": appointments,
-        "precautions": precautions,
-        "prescriptions": prescriptions,
-    })
+    "patient": patient,
+    "appointments": appointments,
+    "precautions": precautions,
+    "prescriptions": prescriptions,
+    "diet_plans": [],
+    "pending_count": pending_count,
+    "completed_count": completed_count,
+    "reminders": [],
+})
 
 @login_required
 def patient_diet_plan(request):
@@ -190,7 +201,7 @@ def patient_prescriptions(request):
 
     prescriptions = Prescription.objects.filter(
     appointment__patient=patient
-).order_by('-created_at')
+    ).order_by('-created_at')
 
     return render(request, 'patients/patient_prescriptions.html', {
         'prescriptions': prescriptions
@@ -204,11 +215,8 @@ def patient_precautions(request):
     precautions = Precaution.objects.filter(therapy__in=therapies).distinct()
     return render(request, "patients/patient_precautions.html", {"precautions": precautions})
 
-#@login_required
-#def appointments_list(request):
- #   patient = request.user.patient
-  #  appointments = patient.therapy_appointments.all().order_by('-date', '-time')  # latest first
-   # return render(request, "patients/appointments_list.html", {"appointments": appointments})#
+
+
 
 @login_required
 def patient_appointments(request):

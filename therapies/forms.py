@@ -1,6 +1,6 @@
 from django import forms
 from .models import Appointment
-
+from .models import Therapy
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
@@ -29,3 +29,8 @@ class AppointmentForm(forms.ModelForm):
                 attrs={'class': 'form-control'}
             ),
         }
+
+class TherapyForm(forms.ModelForm):
+    class Meta:
+        model = Therapy
+        fields = ['therapy_name', 'duration']

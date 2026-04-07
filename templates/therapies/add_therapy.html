@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+    <h2>Add Therapy</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Therapy Info -->
+        {{ form.as_p }}
+
+        <hr>
+
+        <!-- BEFORE PRECAUTIONS -->
+        <h4>Before Therapy Precautions</h4>
+        <div id="before-precautions">
+            <input type="text" name="before_precaution" class="form-control mb-2">
+        </div>
+        <button type="button" onclick="addField('before-precautions','before_precaution')">+ Add</button>
+
+        <!-- AFTER PRECAUTIONS -->
+        <h4 class="mt-3">After Therapy Precautions</h4>
+        <div id="after-precautions">
+            <input type="text" name="after_precaution" class="form-control mb-2">
+        </div>
+        <button type="button" onclick="addField('after-precautions','after_precaution')">+ Add</button>
+
+        <hr>
+
+        <!-- DIET PLAN -->
+        <h4>Before Therapy Diet</h4>
+        <input name="before_morning" placeholder="Morning" class="form-control mb-2">
+        <input name="before_afternoon" placeholder="Afternoon" class="form-control mb-2">
+        <input name="before_evening" placeholder="Evening" class="form-control mb-2">
+        <input name="before_night" placeholder="Night" class="form-control mb-2">
+
+        <h4 class="mt-3">After Therapy Diet</h4>
+        <input name="after_morning" placeholder="Morning" class="form-control mb-2">
+        <input name="after_afternoon" placeholder="Afternoon" class="form-control mb-2">
+        <input name="after_evening" placeholder="Evening" class="form-control mb-2">
+        <input name="after_night" placeholder="Night" class="form-control mb-2">
+
+        <br>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success">
+                Save Therapy
+            </button>
+
+            <a href="{% url 'therapies' %}" class="btn btn-secondary ms-2">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- JS for dynamic fields -->
+<script>
+function addField(containerId, fieldName) {
+    let container = document.getElementById(containerId);
+
+    let input = document.createElement("input");
+    input.type = "text";
+    input.name = fieldName;
+    input.className = "form-control mb-2";
+
+    container.appendChild(input);
+}
+</script>
+
+{% endblock %}

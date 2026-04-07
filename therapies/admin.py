@@ -36,9 +36,9 @@ class TherapyAdmin(admin.ModelAdmin):
 
 @admin.register(Precaution)
 class PrecautionAdmin(admin.ModelAdmin):
-    list_display = ['therapy', 'title']
-    list_filter = ['therapy']
-    search_fields = ['title']
+    list_display = ['appointment', 'type', 'text']
+    list_filter = ['type']
+   # search_fields = ['title']
 
 @admin.register(Prescription)
 class PrescriptionAdmin(admin.ModelAdmin):
