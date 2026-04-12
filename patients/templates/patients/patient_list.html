@@ -47,6 +47,9 @@
                         <a href="{% url 'delete_patient' patient.id %}" class="btn btn-sm btn-danger">
                             Delete
                         </a>
+                        <a href="{% url 'patient_history' patient.id %}" class="btn btn-outline-dark btn-sm">
+                            History
+                        </a>
                     </td>
                 </tr>
                 {% empty %}

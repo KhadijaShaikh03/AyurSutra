@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main-content px-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ patient.name }} - History</h2>
+        <span class="badge bg-dark fs-6">Total Visits: {{ total_visits }}</span>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Therapy</th>
+                            <th>Status</th>
+                            <th>Prescription</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td>{{ appt.date|date:"F d, Y" }}</td>
+                            <td>{{ appt.time|time:"h:i A" }}</td>
+                            <td class="fw-semibold">{{ appt.therapy }}</td>
+                            <td>
+                                {% if appt.status == "COMPLETED" %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif appt.status == "PENDING" %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for p in appt.prescriptions.all %}
+                                    <div class="small">
+                                        <strong>{{ p.medicine_name }}</strong><br>
+                                        {{ p.dosage }} | {{ p.duration }}
+                                    </div>
+                                    <hr class="my-1">
+                                {% empty %}
+                                    <span class="text-muted">No prescription</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+                <div class="text-center p-4">
+                    <p class="text-muted">No history available</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+<style> .main-content { margin-left: 150px; width: calc(100% - 150px); padding: 30px; }</style>
+{% endblock %}

@@ -2,18 +2,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from .models import Patient
 from .forms import PatientForm
-from therapies.models import Therapy, Appointment, Precaution,DietPlan
+from therapies.models import Therapy, Appointment, Precaution, DietPlan
 from datetime import date
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from therapies.models import Appointment
-from therapies.models import Prescription, Precaution
+from therapies.models import Prescription
 from django.contrib.auth import authenticate, login
 from therapies.models import TherapyPrecaution
 
-@login_required
+
 def patient_list(request):
     if hasattr(request.user, 'patient') and not request.user.is_staff:
         return redirect('patient_dashboard')
@@ -95,7 +95,7 @@ def delete_patient(request, pk):
     return render(request, 'patients/patient_confirm_delete.html', {'patient': patient})
 
 
-@login_required
+#@login_required
 def dashboard(request):
     # 🔥 FORCE admin redirect away from /admin/
     if request.path.startswith('/admin'):
@@ -163,8 +163,8 @@ def patient_dashboard(request):
     .select_related('therapy')\
     .order_by('-date', '-time')
     therapy_ids = appointments.values_list('therapy_id', flat=True)
-    pending_count = appointments.filter(status="Pending").count()
-    completed_count = appointments.filter(status="Completed").count()
+    pending_count = appointments.filter(status="PENDING").count()
+    completed_count = appointments.filter(status="COMPLETED").count()
     # Get unique therapies from appointments
     therapies = set(
         appointment.therapy for appointment in appointments if appointment.therapy
@@ -198,8 +198,23 @@ def patient_dashboard(request):
 @login_required
 def patient_diet_plan(request):
     patient = request.user.patient
-    return render(request, "patients/patient_diet_plan.html", {"patient": patient})
 
+    # Get all appointments
+    appointments = patient.therapy_appointments.all()
+
+    # Get diet plans linked to those appointments
+    diet_plans = DietPlan.objects.filter(
+        appointment__in=appointments
+    )
+
+    # Separate before & after
+    before_diet = diet_plans.filter(type='before')
+    after_diet = diet_plans.filter(type='after')
+
+    return render(request, "patients/patient_diet_plan.html", {
+        "before_diet": before_diet,
+        "after_diet": after_diet
+    })
 @login_required
 def patient_prescriptions(request):
     patient = request.user.patient
@@ -214,7 +229,6 @@ def patient_prescriptions(request):
 
 
 
-@login_required
 @login_required
 def patient_precautions(request):
     patient = request.user.patient
@@ -263,3 +277,37 @@ def patient_login(request):
             return render(request, 'patients/login.html', {'error': 'Invalid credentials'})
 
     return render(request, 'patients/login.html')
+
+# 🔹 DOCTOR VIEW
+@login_required
+def patient_history(request, patient_id):
+    patient = Patient.objects.get(id=patient_id)
+
+    appointments = patient.therapy_appointments.select_related('therapy')\
+    .prefetch_related('prescriptions')\
+    .order_by('-date', '-time')
+
+    total_visits = appointments.count()
+
+    return render(request, "patients/doctor_patient_history.html", {
+        "patient": patient,
+        "appointments": appointments,
+        "total_visits": total_visits
+    })
+
+
+# 🔹 PATIENT VIEW
+@login_required
+def patient_history_view(request):
+    patient = request.user.patient
+
+    appointments = patient.therapy_appointments.select_related('therapy')\
+    .prefetch_related('prescriptions')\
+    .order_by('-date', '-time')
+
+    total_visits = appointments.count()
+
+    return render(request, "patients/patient_history.html", {
+        "appointments": appointments,
+        "total_visits": total_visits
+    })

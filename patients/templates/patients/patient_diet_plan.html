@@ -1,58 +1,57 @@
 {% extends 'patients/base_patient.html' %}
 
 {% block content %}
+<div class="main-content px-4">
 
-<style>
-.container { padding: 20px; }
-
-.title {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-.card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.section {
-    margin-bottom: 20px;
-}
-
-.section h6 {
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.placeholder {
-    color: #777;
-}
-</style>
-
-<div class="container">
-    <div class="title">Diet Plan</div>
-
-    <div class="card">
-
-        <div class="section">
-            <h6>Morning</h6>
-            <p class="placeholder">Warm water + herbal drink (to be added)</p>
-        </div>
-
-        <div class="section">
-            <h6>Afternoon</h6>
-            <p class="placeholder">Balanced meal based on therapy</p>
-        </div>
-
-        <div class="section">
-            <h6>Evening</h6>
-            <p class="placeholder">Light dinner + detox suggestion</p>
-        </div>
-
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Diet Plan</h2>
     </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- BEFORE DIET -->
+            <h5 class="mb-3 text-primary">Before Therapy Diet</h5>
+
+            {% for diet in before_diet %}
+            <div class="mb-4 p-3 border rounded bg-light">
+                
+                <div class="row">
+                    <div class="col-md-3"><b>Morning:</b><br>{{ diet.morning }}</div>
+                    <div class="col-md-3"><b>Afternoon:</b><br>{{ diet.afternoon }}</div>
+                    <div class="col-md-3"><b>Evening:</b><br>{{ diet.evening }}</div>
+                    <div class="col-md-3"><b>Night:</b><br>{{ diet.night }}</div>
+                </div>
+
+            </div>
+            {% empty %}
+                <p class="text-muted">No before diet available</p>
+            {% endfor %}
+
+
+            <!-- AFTER DIET -->
+            <h5 class="mt-4 mb-3 text-success">After Therapy Diet</h5>
+
+            {% for diet in after_diet %}
+            <div class="mb-4 p-3 border rounded bg-light">
+                
+                <div class="row">
+                    <div class="col-md-3"><b>Morning:</b><br>{{ diet.morning }}</div>
+                    <div class="col-md-3"><b>Afternoon:</b><br>{{ diet.afternoon }}</div>
+                    <div class="col-md-3"><b>Evening:</b><br>{{ diet.evening }}</div>
+                    <div class="col-md-3"><b>Night:</b><br>{{ diet.night }}</div>
+                </div>
+
+            </div>
+            {% empty %}
+                <p class="text-muted">No after diet available</p>
+            {% endfor %}
+
+        </div>
+    </div>
+
 </div>
+<style> .main-content { margin-left: 150px; width: calc(100% - 150px); padding: 30px; }</style>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load custom_tags %}
+{% load therapy_tags %}
 
 {% block content %}
 <div class="main-content container my-4">
@@ -108,5 +108,8 @@ function updateStatus(appointmentId, status) {
 .table td {
     vertical-align: top;
 }
+.main-content {
+     margin-left: 150px; width: calc(100% - 150px); padding: 30px; 
+     }
 </style>
 {% endblock %}

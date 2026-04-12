@@ -20,4 +20,7 @@ urlpatterns = [
     path('precautions/', views.patient_precautions, name='patient_precautions'),
     #path('appointments/', views.appointments_list, name='appointments'),
     path('appointments/', views.patient_appointments, name='patient_appointments'),
+    path('patients/<int:patient_id>/history/', views.patient_history, name='patient_history'),
+    path('my-history/', views.patient_history_view, name='patient_history_view'),
+    
 ]

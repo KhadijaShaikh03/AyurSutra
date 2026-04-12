@@ -41,14 +41,14 @@ body {
     <div class="col-md-3">
         <div class="card shadow-sm p-3 h-100">
             <h6 class="text-muted">Pending</h6>
-            <h3 class="fw-bold text-warning">{{ pending_count|length }}</h3>
+            <h3 class="fw-bold text-warning">{{ pending_count }}</h3>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="card shadow-sm p-3 h-100">
             <h6 class="text-muted">Completed</h6>
-            <h3 class="fw-bold text-success">{{ completed_count|length }}</h3>
+            <h3 class="fw-bold text-success">{{ completed_count }}</h3>
         </div>
     </div>
 
@@ -81,14 +81,13 @@ body {
                                 <th>Time</th>
                                 <th>Therapy</th>
                                 <th>Status</th>
-                                <th>Doctor Notes</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for a in appointments %}
                             <tr>
-                                <td>{{ a.date }}</td>
-                                <td>{{ a.time }}</td>
+                                <td>{{ a.date|date:"F d, Y" }}</td>
+                                <td>{{ a.time|time:"h:i A" }}</td>
                                 <td>{{ a.therapy.therapy_name|default:"-" }}</td>
 
                                 <td>
@@ -103,17 +102,7 @@ body {
                                     {% endif %}
                                 </td>
 
-                                <td>
-                                    {% if a.prescriptions.exists %}
-                                        <button class="btn btn-sm btn-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#prescriptionModal{{ a.id }}">
-                                            View
-                                        </button>
-                                    {% else %}
-                                        <span class="text-muted">Not Available</span>
-                                    {% endif %}
-                                </td>
+                                
                             </tr>
                             {% endfor %}
                         </tbody>
